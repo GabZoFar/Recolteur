@@ -4,6 +4,8 @@ import numpy as np
 import time
 from collections import deque
 
+#Bonjour
+
 def find_pattern(template_paths, threshold=0.7):
     # Capture screen
     screen = np.array(pyautogui.screenshot())
