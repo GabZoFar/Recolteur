@@ -47,17 +47,19 @@ def find_nearest_unclicked(locations, clicked_locations, max_distance=10):
 
     return nearest_location
 
-def main():
-    patterns1 = ['Chanvre1.png', 'Chanvre2.png', 'Chanvre3.png', 'Chanvre4.png', 'Chanvre5.png', 'Chanvre6.png', 'Chanvre7.png', 'Chanvre8.png', 'Chanvre9.png', 'Chanvre10.png']  # Multiple images for first pattern
-    pattern2 = 'Faucher.png'
-    clicked_locations = deque(maxlen=10)  # Store last 10 clicked locations
-    max_retries = 5  # Maximum number of retries for the first pattern
-
+def main(worker=None):
+    print("Main function started")
     print("Starting in 2 seconds...")
     time.sleep(2)
     print("Script is now running.")
+    while worker is None or worker.running:
+        patterns1 = ['Chanvre1.png', 'Chanvre2.png', 'Chanvre3.png', 'Chanvre4.png', 'Chanvre5.png', 'Chanvre6.png', 'Chanvre7.png', 'Chanvre8.png', 'Chanvre9.png', 'Chanvre10.png']  # Multiple images for first pattern
+        pattern2 = 'Faucher.png'
+        clicked_locations = deque(maxlen=10)  # Store last 10 clicked locations
+        max_retries = 5  # Maximum number of retries for the first pattern
 
-    while True:
+       
+
         # Look for the first pattern with retries
         first_pattern_found = False
         for attempt in range(max_retries):
@@ -96,6 +98,6 @@ def main():
         # Wait before starting the next iteration
         time.sleep(1)
         print("Starting next iteration...")
-
+    print("Fin de la récolte")
 if __name__ == "__main__":
     main()
