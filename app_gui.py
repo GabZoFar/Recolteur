@@ -1,5 +1,5 @@
 import sys
-from PyQt6.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout
+from PyQt6.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QLabel
 from PyQt6.QtCore import QThread, pyqtSignal
 import app  as recolteur # Import your existing app.py file
 
@@ -38,6 +38,9 @@ class MainWindow(QWidget):
         self.stop_button.setEnabled(False)
         layout.addWidget(self.stop_button)
 
+        self.status_label = QLabel('', self)
+        layout.addWidget(self.status_label)
+
         self.setLayout(layout)
 
     def start_main(self):
@@ -52,6 +55,7 @@ class MainWindow(QWidget):
             self.worker.stop()
             self.worker.wait()
             self.on_finished()
+            self.status_label.setText("Fin de la récolte...")
 
     def on_finished(self):
         self.start_button.setEnabled(True)
