@@ -7,15 +7,23 @@ from collections import deque
 
 class Match:
     """Renvoie les coordonnées d'un pattern trouvé avec son pattern"""
-    def __init__(self, location, template_path):
+    def __init__(self, location, template_path, h, w, value):
         self.x = int(location[0])
         self.y = int(location[1])
         self.template_path = template_path
+        self.h = h
+        self.w = w
+        self.value = value
+    
+    def __repr__(self):
+        return f"Match(location=({self.x}, {self.y}), template_path={self.template_path}, " \
+            f"h={self.h}, w={self.w}, value={self.value})"
 
     @staticmethod
     def make_screenshot(region=None):
         """Effectue le screenshot"""
         return pyautogui.screenshot(region=region)
+    
 
     @classmethod
     def find_pattern(cls, template_paths, in_ = None, region=None, threshold=0.7):
@@ -53,28 +61,42 @@ class Match:
         for template_path in template_paths:
             # Load template image
             template = cv2.imread(template_path)
+            if not template.any():
+                raise ValueError(f"Template {template_path} not found")
+            
             h, w = template.shape[:2]
 
             # Perform template matching
             result = cv2.matchTemplate(screen_bgr, template, cv2.TM_CCOEFF_NORMED)
+            print("result", result)
+            print("len(result)", len(result))
             locations = np.where(result >= threshold)
             if locations:
                 print(f"Found {len(locations[0])} instances of {template_path}")
                 locations = list(zip(*locations[::-1]))
                 for location in locations:
-                    all_locations.append(Match(location, template_path))
+                    all_locations.append(Match(location, template_path, h, w, value=result[location[1], location[0]]))
         return all_locations
     
+
+def show_pattern_locations(locations: List[Match], screen   ):
+    """
+    Affiche les emplacements des motifs sur l'écran
+    """
+    for location in locations:
+        cv2.rectangle(screen, (location.x, location.y), (location.x + location.w, location.y + location.h), (0, 0, 255), 2)
+    cv2.imshow("Pattern Locations", screen)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
 
 def click_pattern(location: Match):
     """
     Clic sur le pattern (au centre du pattern)
     """
-    template = cv2.imread(location.template_path)
-    h, w = template.shape[:2]
     
-    center_x = location[0] + w // 2
-    center_y = location[1] + h // 2
+    center_x = location.x + location.w // 2
+    center_y = location.y + location.h // 2
 
     pyautogui.moveTo(center_x, center_y)
     pyautogui.click()
@@ -133,6 +155,10 @@ class Recolter:
                 else:
                     print(f"First pattern not found (attempt {attempt + 1})")
                     time.sleep(0.1)  # Wait a bit before retrying
+                if worker and not worker.running:
+                    break
+            if worker and not worker.running:
+                break
             
             if not first_pattern_found:
                 print("First pattern not found after all retries")
@@ -144,6 +170,8 @@ class Recolter:
             locations2 = Match.find_pattern([self.pattern2], threshold=0.8)
             nearest2 = find_nearest_unclicked(locations2, clicked_locations)
             
+            if worker and not worker.running:
+                break
             if nearest2:
                 print("Second pattern found and clicked")
                 click_pattern(nearest2, self.pattern2)
@@ -153,6 +181,9 @@ class Recolter:
             # Wait before starting the next iteration
             time.sleep(1)
             print("Starting next iteration...")
+
         print("Fin de la récolte")
+
+
 if __name__ == "__main__":
-    main()
+    Recolter().run()
