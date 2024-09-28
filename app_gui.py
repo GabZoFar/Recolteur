@@ -1,7 +1,7 @@
 import sys
 from PyQt6.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QLabel
 from PyQt6.QtCore import QThread, pyqtSignal
-import app  as recolteur # Import your existing app.py file
+from app import Recolter
 
 class Worker(QThread):
     finished = pyqtSignal()
@@ -11,7 +11,8 @@ class Worker(QThread):
         self.running = True
 
     def run(self):
-        recolteur.main(self)  # Pass the worker instance to main
+        recolteur = Recolter()
+        recolteur.run(self)  # Pass the worker instance to main
         self.finished.emit()
 
     def stop(self):

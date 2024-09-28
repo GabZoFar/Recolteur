@@ -1,31 +1,76 @@
+from typing import List
 import pyautogui
 import cv2
 import numpy as np
 import time
 from collections import deque
 
-def find_pattern(template_paths, threshold=0.7):
-    # Capture screen
-    screen = np.array(pyautogui.screenshot())
-    screen_bgr = cv2.cvtColor(screen, cv2.COLOR_RGB2BGR)
+class Match:
+    """Renvoie les coordonnées d'un pattern trouvé avec son pattern"""
+    def __init__(self, location, template_path):
+        self.x = int(location[0])
+        self.y = int(location[1])
+        self.template_path = template_path
 
-    all_locations = []
-    for template_path in template_paths:
-        # Load template image
-        template = cv2.imread(template_path)
-        h, w = template.shape[:2]
+    @staticmethod
+    def make_screenshot(region=None):
+        """Effectue le screenshot"""
+        return pyautogui.screenshot(region=region)
 
-        # Perform template matching
-        result = cv2.matchTemplate(screen_bgr, template, cv2.TM_CCOEFF_NORMED)
-        locations = np.where(result >= threshold)
-        if locations:
-            print(f"Found {len(locations[0])} instances of {template_path}")
-        all_locations.extend(list(zip(*locations[::-1])))  # Add (x, y) coordinates
+    @classmethod
+    def find_pattern(cls, template_paths, in_ = None, region=None, threshold=0.7):
+        
+        """
+        Recherche des motifs dans une capture d'écran.
+
+        Args:
+            template_paths (list): Liste des chemins vers les images de motifs à rechercher.
+            in_ : Pillow image ou path pour trouver le template. Si None, effectue un screenshot
+            region: Region à analyser dans l’image
+            threshold (float, optional): Seuil de correspondance pour la détection des motifs. Par défaut à 0.7.
+
+        Returns:
+            list: Liste des objets Match trouvés
+
+        Note:
+            Cette fonction utilise la correspondance de modèle OpenCV pour trouver les motifs.
+            Elle convertit l'image de l'écran en BGR pour la compatibilité avec OpenCV.
+        """
+        
+        if in_ is None:
+            screen = cls.make_screenshot(region=region)
+        else:
+            if isinstance(in_, str):
+                screen = cv2.imread(in_)
+            else:
+                screen = in_
+        # Capture screen
+        
+        screen = np.array(screen)
+        screen_bgr = cv2.cvtColor(screen, cv2.COLOR_RGB2BGR)
+
+        all_locations = []
+        for template_path in template_paths:
+            # Load template image
+            template = cv2.imread(template_path)
+            h, w = template.shape[:2]
+
+            # Perform template matching
+            result = cv2.matchTemplate(screen_bgr, template, cv2.TM_CCOEFF_NORMED)
+            locations = np.where(result >= threshold)
+            if locations:
+                print(f"Found {len(locations[0])} instances of {template_path}")
+                locations = list(zip(*locations[::-1]))
+                for location in locations:
+                    all_locations.append(Match(location, template_path))
+        return all_locations
     
-    return all_locations
 
-def click_pattern(location, template_path):
-    template = cv2.imread(template_path)
+def click_pattern(location: Match):
+    """
+    Clic sur le pattern (au centre du pattern)
+    """
+    template = cv2.imread(location.template_path)
     h, w = template.shape[:2]
     
     center_x = location[0] + w // 2
@@ -34,71 +79,80 @@ def click_pattern(location, template_path):
     pyautogui.moveTo(center_x, center_y)
     pyautogui.click()
 
-def find_nearest_unclicked(locations, clicked_locations, max_distance=70): #increased max dist from 10 to 50
+
+def find_nearest_unclicked(locations: List[Match], clicked_locations, not_near_than=70): #increased max dist from 10 to 50
     current_pos = pyautogui.position()
     nearest_location = None
     min_distance = float('inf')
 
     for loc in locations:
-        if not any(abs(loc[0] - c[0]) < max_distance and abs(loc[1] - c[1]) < max_distance for c in clicked_locations):
-            distance = ((current_pos.x - loc[0])**2 + (current_pos.y - loc[1])**2)**0.5
+        if not any(abs(loc.x - c.x) < not_near_than and abs(loc.y - c.y) < not_near_than for c in clicked_locations):
+            distance = ((current_pos.x - loc.x)**2 + (current_pos.y - loc.y)**2)**0.5
             if distance < min_distance:
                 min_distance = distance
                 nearest_location = loc
 
     return nearest_location
 
-def main(worker=None):
-    print("Main function started")
-    print("Starting in 2 seconds...")
-    time.sleep(2)
-    print("Script is now running.")
-    while worker is None or worker.running:
-        patterns1 = ['Chanvre1.png', 'Chanvre2.png', 'Chanvre3.png', 'Chanvre4.png', 'Chanvre6.png', 'Chanvre7.png', 'Chanvre8.png', 'Chanvre10.png']  # Multiple images for first pattern
-        pattern2 = 'Faucher.png'
-        clicked_locations = deque(maxlen=10)  # Store last 10 clicked locations
-        max_retries = 5  # Maximum number of retries for the first pattern
+class Recolter:
 
-       
+    def __init__(self, 
+                 patterns1 = None, 
+                 pattern2 = None):
 
-        # Look for the first pattern with retries
-        first_pattern_found = False
-        for attempt in range(max_retries):
-            t = time.time()
-            locations1 = find_pattern(patterns1, threshold=0.7)
-            print(f"Time taken to find first pattern: {time.time() - t} seconds")
-            nearest1 = find_nearest_unclicked(locations1, clicked_locations)
+        self.patterns1 = patterns1 if patterns1 is not None else ['Chanvre1.png', 'Chanvre2.png', 'Chanvre3.png', 'Chanvre4.png', 'Chanvre6.png', 'Chanvre7.png', 'Chanvre8.png', 'Chanvre10.png']  # Multiple images for first pattern
+        self.pattern2 = pattern2 if pattern2 is not None else 'Faucher.png'
+        self.max_retries = 5  # Maximum number of retries for the first pattern to find
+
+
+    def run(self, worker=None):
+        """Démarre l’action de faucher"""
+
+
+        print("Main function started")
+        print("Starting in 2 seconds...")
+        time.sleep(2)
+        print("Script is now running.")
+        clicked_locations = deque(maxlen=2) # store last 2 clicked locations
+        while worker is None or worker.running:
             
-            if nearest1:
-                print(f"First pattern found and clicked (attempt {attempt + 1})")
-                click_pattern(nearest1, patterns1[0])  # Use the first pattern image for clicking
-                clicked_locations.append(nearest1)
-                first_pattern_found = True
-                break
+            # Look for the first pattern with retries
+            first_pattern_found = False
+            for attempt in range(self.max_retries):
+                t = time.time()
+                locations1 = Match.find_pattern(self.patterns1, threshold=0.7)
+                print(f"Time taken to find first pattern: {time.time() - t} seconds")
+                nearest1 = find_nearest_unclicked(locations1, clicked_locations)
+                
+                if nearest1:
+                    print(f"First pattern found and clicked (attempt {attempt + 1})")
+                    click_pattern(nearest1)
+                    clicked_locations.append(nearest1)
+                    first_pattern_found = True
+                    break
+                else:
+                    print(f"First pattern not found (attempt {attempt + 1})")
+                    time.sleep(0.1)  # Wait a bit before retrying
+            
+            if not first_pattern_found:
+                print("First pattern not found after all retries")
+                time.sleep(1)
+                continue  # Start the next iteration of the main loop
+            
+            # Look for the second pattern
+            time.sleep(0.1)
+            locations2 = Match.find_pattern([self.pattern2], threshold=0.8)
+            nearest2 = find_nearest_unclicked(locations2, clicked_locations)
+            
+            if nearest2:
+                print("Second pattern found and clicked")
+                click_pattern(nearest2, self.pattern2)
             else:
-                print(f"First pattern not found (attempt {attempt + 1})")
-                time.sleep(0.1)  # Wait a bit before retrying
-        
-        if not first_pattern_found:
-            print("First pattern not found after all retries")
-            time.sleep(1)
-            continue  # Start the next iteration of the main loop
-        
-        # Look for the second pattern
-        time.sleep(0.1)
-        locations2 = find_pattern([pattern2], threshold=0.8)
-        nearest2 = find_nearest_unclicked(locations2, clicked_locations)
-        
-        if nearest2:
-            print("Second pattern found and clicked")
-            click_pattern(nearest2, pattern2)
-            # clicked_locations.append(nearest2)
-        else:
-            print("Second pattern not found")
+                print("Second pattern not found")
 
-        # Wait before starting the next iteration
-        time.sleep(1)
-        print("Starting next iteration...")
-    print("Fin de la récolte")
+            # Wait before starting the next iteration
+            time.sleep(1)
+            print("Starting next iteration...")
+        print("Fin de la récolte")
 if __name__ == "__main__":
     main()
