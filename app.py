@@ -18,7 +18,8 @@ def find_pattern(template_paths, threshold=0.7):
         # Perform template matching
         result = cv2.matchTemplate(screen_bgr, template, cv2.TM_CCOEFF_NORMED)
         locations = np.where(result >= threshold)
-        
+        if locations:
+            print(f"Found {len(locations[0])} instances of {template_path}")
         all_locations.extend(list(zip(*locations[::-1])))  # Add (x, y) coordinates
     
     return all_locations
@@ -33,7 +34,7 @@ def click_pattern(location, template_path):
     pyautogui.moveTo(center_x, center_y)
     pyautogui.click()
 
-def find_nearest_unclicked(locations, clicked_locations, max_distance=10):
+def find_nearest_unclicked(locations, clicked_locations, max_distance=70): #increased max dist from 10 to 50
     current_pos = pyautogui.position()
     nearest_location = None
     min_distance = float('inf')
@@ -53,7 +54,7 @@ def main(worker=None):
     time.sleep(2)
     print("Script is now running.")
     while worker is None or worker.running:
-        patterns1 = ['Chanvre1.png', 'Chanvre2.png', 'Chanvre3.png', 'Chanvre4.png', 'Chanvre5.png', 'Chanvre6.png', 'Chanvre7.png', 'Chanvre8.png', 'Chanvre9.png', 'Chanvre10.png']  # Multiple images for first pattern
+        patterns1 = ['Chanvre1.png', 'Chanvre2.png', 'Chanvre3.png', 'Chanvre4.png', 'Chanvre6.png', 'Chanvre7.png', 'Chanvre8.png', 'Chanvre10.png']  # Multiple images for first pattern
         pattern2 = 'Faucher.png'
         clicked_locations = deque(maxlen=10)  # Store last 10 clicked locations
         max_retries = 5  # Maximum number of retries for the first pattern
@@ -63,7 +64,9 @@ def main(worker=None):
         # Look for the first pattern with retries
         first_pattern_found = False
         for attempt in range(max_retries):
+            t = time.time()
             locations1 = find_pattern(patterns1, threshold=0.7)
+            print(f"Time taken to find first pattern: {time.time() - t} seconds")
             nearest1 = find_nearest_unclicked(locations1, clicked_locations)
             
             if nearest1:
@@ -74,24 +77,22 @@ def main(worker=None):
                 break
             else:
                 print(f"First pattern not found (attempt {attempt + 1})")
-                time.sleep(0.5)  # Wait a bit before retrying
+                time.sleep(0.1)  # Wait a bit before retrying
         
         if not first_pattern_found:
             print("First pattern not found after all retries")
             time.sleep(1)
             continue  # Start the next iteration of the main loop
         
-        # Wait before looking for the second pattern
-        time.sleep(0.1)
-        
         # Look for the second pattern
-        locations2 = find_pattern([pattern2], threshold=0.7)
+        time.sleep(0.1)
+        locations2 = find_pattern([pattern2], threshold=0.8)
         nearest2 = find_nearest_unclicked(locations2, clicked_locations)
         
         if nearest2:
             print("Second pattern found and clicked")
             click_pattern(nearest2, pattern2)
-            clicked_locations.append(nearest2)
+            # clicked_locations.append(nearest2)
         else:
             print("Second pattern not found")
 
