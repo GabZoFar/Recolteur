@@ -69,6 +69,10 @@ def main(worker=None):
             print(f"Time taken to find first pattern: {time.time() - t} seconds")
             nearest1 = find_nearest_unclicked(locations1, clicked_locations)
             
+            # Exclude the last clicked location for the first pattern
+            # if clicked_locations:
+            #     locations1 = [loc for loc in locations1 if loc != clicked_locations[-1]]
+
             if nearest1:
                 print(f"First pattern found and clicked (attempt {attempt + 1})")
                 click_pattern(nearest1, patterns1[0])  # Use the first pattern image for clicking
