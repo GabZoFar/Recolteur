@@ -53,11 +53,12 @@ def main(worker=None):
     print("Starting in 2 seconds...")
     time.sleep(2)
     print("Script is now running.")
+    patterns1 = ['Chanvre1.png', 'Chanvre2.png', 'Chanvre3.png', 'Chanvre4.png', 'Chanvre6.png', 'Chanvre5.png', 'Chanvre7.png', 'Chanvre8.png', 'Chanvre10.png']  # Multiple images for first pattern
+    pattern2 = 'Faucher.png'
+    clicked_locations = deque(maxlen=2)  # Store last 10 clicked locations
+    max_retries = 5  # Maximum number of retries for the first pattern
     while worker is None or worker.running:
-        patterns1 = ['Chanvre1.png', 'Chanvre2.png', 'Chanvre3.png', 'Chanvre4.png', 'Chanvre6.png', 'Chanvre7.png', 'Chanvre8.png', 'Chanvre10.png']  # Multiple images for first pattern
-        pattern2 = 'Faucher.png'
-        clicked_locations = deque(maxlen=10)  # Store last 10 clicked locations
-        max_retries = 5  # Maximum number of retries for the first pattern
+
 
        
 
