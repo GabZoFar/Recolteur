@@ -174,7 +174,7 @@ class Recolter:
                 break
             if nearest2:
                 print("Second pattern found and clicked")
-                click_pattern(nearest2, self.pattern2)
+                click_pattern(nearest2)
             else:
                 print("Second pattern not found")
 
