@@ -1,4 +1,4 @@
-from recolter import Recolter
+from recolteur import Recolter
 
 if __name__ == "__main__":
     Recolter().run()
