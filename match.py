@@ -68,8 +68,6 @@ class Match:
 
             # Perform template matching
             result = cv2.matchTemplate(screen_bgr, template, cv2.TM_CCOEFF_NORMED)
-            print("result", result)
-            print("len(result)", len(result))
             locations = np.where(result >= threshold)
             if locations:
                 print(f"Found {len(locations[0])} instances of {template_path}")
@@ -90,7 +88,7 @@ def show_pattern_locations(locations: List[Match], screen   ):
     cv2.destroyAllWindows()
 
 
-def click_pattern(location: Match):
+def click_pattern(location: Match, right_click=False):
     """
     Clic sur le pattern (au centre du pattern)
     """
@@ -99,7 +97,10 @@ def click_pattern(location: Match):
     center_y = location.y + location.h // 2
 
     pyautogui.moveTo(center_x, center_y)
-    pyautogui.click()
+    if right_click:
+        pyautogui.rightClick()
+    else:
+        pyautogui.click()
 
 
 def find_nearest_unclicked(locations: List[Match], clicked_locations, not_near_than=70): #increased max dist from 10 to 50

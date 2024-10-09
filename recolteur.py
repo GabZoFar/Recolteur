@@ -5,7 +5,7 @@ import numpy as np
 import time
 from collections import deque
 from match import Match, find_nearest_unclicked, click_pattern
-
+from combat import Combat
 class Recolter:
 
     def __init__(self, 
@@ -27,6 +27,8 @@ class Recolter:
         print("Script is now running.")
         clicked_locations = deque(maxlen=2) # store last 2 clicked locations
         while worker is None or worker.running:
+            if Combat.find_red_square():
+                Combat.execute_combat_sequence(worker)
             
             # Look for the first pattern with retries
             first_pattern_found = False
