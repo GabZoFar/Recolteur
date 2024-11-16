@@ -1,4 +1,5 @@
 # Bot Récolteur Dofus Retro
+(English below)
 
 Un bot de récolte automatisé utilisant la vision par ordinateur pour détecter et interagir avec les éléments du jeu. Le bot peut détecter des ressources et les récolter.
 
