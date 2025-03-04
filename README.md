@@ -4,59 +4,59 @@
 Un bot de récolte automatisé utilisant la vision par ordinateur pour détecter et interagir avec les éléments du jeu. Le bot peut détecter des ressources et les récolter.
 
 ## Fonctionnalités
-	- Interface graphique (GUI) avec fonctions de démarrage/arrêt
-	- Détection et récolte automatique des ressources
-	- Automatisation du système de combat
-	- Correspondance de motifs avec OpenCV
-	- Seuils de détection configurables
+- Interface graphique (GUI) avec fonctions de démarrage/arrêt
+- Détection et récolte automatique des ressources
+- Automatisation du système de combat
+- Correspondance de motifs avec OpenCV
+- Seuils de détection configurables
 
 ## Prérequis
 
-	- Python 3.x
-	- Les bibliothèques Python suivantes (à installer avec uv ou pip) :
-		- PyQt6
-		- pyautogui
-		- opencv-python
-		- numpy
-		- pillow
-		- scipy
+- Python 3.x
+- Les bibliothèques Python suivantes (à installer avec uv ou pip) :
+	- PyQt6
+	- pyautogui
+	- opencv-python
+	- numpy
+	- pillow
+	- scipy
 
 ## Installation
 
-	1. Clonez le dépôt
-	2. Installez les dépendances requises : uv pip install -r requirements.txt
-	3. Placez vos images de motifs (*.png) dans le même répertoire que l’exécutable :
-		- Chanvre1.png à Chanvre10.png (motifs des ressources)
-		- Faucher.png (motif pour l’action de récolte)
-		- carrerouge1.png à carrerouge3.png (indicateurs de combat)
-		- tireloigne.png (action de combat)
-		- protector1.png à protector3.png (motifs pour les combats)
-		- Fincombat.png (indicateur de fin de combat)
+1. Clonez le dépôt
+2. Installez les dépendances requises : uv pip install -r requirements.txt
+3. Placez vos images de motifs (*.png) dans le même répertoire que l’exécutable :
+	- Chanvre1.png à Chanvre10.png (motifs des ressources)
+	- Faucher.png (motif pour l’action de récolte)
+	- carrerouge1.png à carrerouge3.png (indicateurs de combat)
+	- tireloigne.png (action de combat)
+	- protector1.png à protector3.png (motifs pour les combats)
+	- Fincombat.png (indicateur de fin de combat)
 
 ## Utilisation
 
 Exécution à partir du code source
 
-	1. Lancez la version GUI : python app_gui.py
-	2. Ou lancez la version console : python app.py
+1. Lancez la version GUI : python app_gui.py
+2. Ou lancez la version console : python app.py
 
 ## Exécution de l’exécutable .exe
 
 En cours de développement : python build_exe.py
-	2. Lancez l’exécutable généré Recolteur.exe dans le dossier dist.
+2. Lancez l’exécutable généré Recolteur.exe dans le dossier dist.
 
 ## Fonctionnement
 
-	1. Le bot analyse en continu l’écran à la recherche de motifs de ressources.
-	2. Lorsqu’une ressource est trouvée, il déplace le curseur et clique pour interagir.
-	3. Si un combat est détecté (carré rouge), il passe en mode combat et exécute la séquence de combat.
-	4. Le bot conserve un historique des positions cliquées pour éviter de cliquer plusieurs fois au même endroit.
+1. Le bot analyse en continu l’écran à la recherche de motifs de ressources.
+2. Lorsqu’une ressource est trouvée, il déplace le curseur et clique pour interagir.
+3. Si un combat est détecté (carré rouge), il passe en mode combat et exécute la séquence de combat.
+4. Le bot conserve un historique des positions cliquées pour éviter de cliquer plusieurs fois au même endroit.
 
 ## Contrôles
 
-	- Bouton Démarrer : Lance la séquence de récolte
-	- Bouton Arrêter : Arrête le bot en toute sécurité
-	- Touche ESC : Arrêt d’urgence pendant une séquence de combat
+- Bouton Démarrer : Lance la séquence de récolte
+- Bouton Arrêter : Arrête le bot en toute sécurité
+- Touche ESC : Arrêt d’urgence pendant une séquence de combat
 
 ## Licence
 
